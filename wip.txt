@@ -1,0 +1,17 @@
+Revisit: 
+
+Mall.c - void signal_handler (int sig, siginfo_t* infoPtr, void* dataPtr)
+Mall.c - int main sig handlers
+joey.c - 131 sig actions, 164
+mall.c 214 verbage
+
+
+
+//6:08
+//6:13
+//last should be advanced handler
+
+//d5RsREyQxFskXAk
+
+
+mall.c - line 150

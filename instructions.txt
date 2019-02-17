@@ -1,0 +1,62 @@
+A mother kangaroo has lost some number of her baby kangroos ("joeys") in a shopping mall. 
+To be easy to find she will stay outside. Each joey was lost in its own unique location, 
+and thus must make its own way out of the mall.
+
+To find its way out of the mall, a joey must 
+-hop along the corridor it is in 
+and then 
+-choose the proper direction when the corridor ends (either left or right) 
+by 
+-sending either LEFT_TURN_SIGNAL (SIGUSR1) or RIGHT_TURN_SIGNAL (SIGUSR2) to the mall. 
+If it chooses incorrectly then 
+-the mall will instantly tell it whether or not it has made the correct turn.
+
+//Corect direction
+-If it has, then it hops along the next corridor until it has to make another decision
+//Incorrect direction
+-If it has not, then it chooses the other direction.
+
+
+In this assignment we'll make 3 programs:
+
+A mamaKangaroo program which will:
+Ask for the number of joeys to make
+Ask for a random number seed
+Install a SIGCHLD handler
+Start a mall process
+Start the joey process(es)
+Wait for all joeys to find their way back to her pouch
+Send SIGINT to the mall process, printf() a parting message, free() its memory, and then quit.
+
+
+A joey program that guesses at its initial direction (which it keeps in nextTurn). Thereafter,
+When it receives CORRECT_TURN_SIGNAL it printf()s a happy message, hops down the next hall, 
+chooses a next direction (either LEFT_TURN_SIGNAL or RIGHT_TURN_SIGNAL), and sends that to the mall process.
+When it receives WRONG_TURN_SIGNAL it printf()s a chastised message, chooses the other direction 
+(opposite of what is currently in nextTurn), and sends that to the mall process.
+When it receives SIGINT it printf()s a celebratory message, and goes on to stop the program.
+
+A mall program that waits until it receives either LEFT_TURN_SIGNAL (SIGUSR1) or RIGHT_TURN_SIGNAL (SIGUSR2) 
+from a joey process. It will then compare that move with the move the joey should have taken.
+If the joey took the wrong move then it:
+printf()s a message that tells this.
+sends WRONG_TURN_SIGNAL back to the joey process.
+If the joey took the right move then it:
+printf()s a message that tells this.
+increments joeysNumSuccessfulTurns[joey]
+If joeysNumSuccessfulTurns[joey] is greater than or equal to NUM_TURNS_MUST_SUCCESSFULLY_MAKE 
+then it has made it out of the mall. It printf()s a message that tells this and sends SIGINT to the joey process.
+
+However, if joeysNumSuccessfulTurns[joey] is less than NUM_TURNS_MUST_SUCCESSFULLY_MAKE 
+then it still has at least one more turn to make. 
+It printf()s a message telling how many more moves the joey should make 
+and sends CORRECT_TURN_SIGNAL back to the joey process.
+When all of the joeys have made it out of the mall then the mama kangagroo process will send this mall process SIGINT. 
+This mall process will then printf() a parting message, free() its memory, and then quit.
+
+(5 Points extra credit)
+These programs will work correctly for one 1 joey process. 
+They will work correctly most of the time for 2 joey processes. 
+Sometimes they will work correctly, and sometimes they will not, for 3 joey processes. 
+For 4 joey processes or more the joey processes will finish while others will be awaiting feedback from the mall process. 
+Meanwhile, the mall process will be awaiting choices from some of the joey processes.
