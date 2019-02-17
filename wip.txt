@@ -11,7 +11,4 @@ mall.c 214 verbage
 //6:13
 //last should be advanced handler
 
-//d5RsREyQxFskXAk
-
-
 mall.c - line 150
