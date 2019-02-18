@@ -141,34 +141,34 @@ int wasJoeysTurnCorrect(int joeyIndex,
 void signal_handler(int sig, siginfo_t *infoPtr, void *dataPtr)
 {
 
-  pid_t joeyProcessId = infoPtr->si_pid;
+  pid_t jPid = infoPtr->si_pid;
 
-  int joeyIndex = getJoeyIndex(joeyProcessId);
+  int jIdx = getJoeyIndex(jPid);
 
-  if (wasJoeysTurnCorrect(joeyIndex, sig) == 0)
+  if (wasJoeysTurnCorrect(jIdx, sig) == 0)
   {
-
-    printf("Mall: Joey # %d made the wrong turn!  (%s) \n", joeyIndex, (sig == LEFT_TURN_SIGNAL) ? "left" : "right");
-    kill(joeyProcessId, WRONG_TURN_SIGNAL);
+    const char *DIRECTION = (sig == RIGHT_TURN_SIGNAL) ? "right" : "left";
+    printf("Mall: Joey # %d made the wrong turn!  (%s) \n", jIdx, DIRECTION);
+    kill(jPid, WRONG_TURN_SIGNAL);
   }
-  else if (wasJoeysTurnCorrect(joeyIndex, sig) == 1)
+  else if (wasJoeysTurnCorrect(jIdx, sig) == 1)
   {
 
-    printf("Mall: Joey # %d turned correctly!  (%s) \n", joeyIndex, (sig == LEFT_TURN_SIGNAL) ? "left" : "right");
+    const char *DIRECTION = (sig == RIGHT_TURN_SIGNAL) ? "right" : "left";
+    printf("Mall: Joey # %d turned correctly!  (%s) \n", jIdx, DIRECTION);
+    joeysNumSuccessfulTurns[jIdx]++;
 
-    joeysNumSuccessfulTurns[joeyIndex]++;
-
-    if (joeysNumSuccessfulTurns[joeyIndex] >= NUM_TURNS_MUST_SUCCESSFULLY_MAKE)
+    if (joeysNumSuccessfulTurns[jIdx] >= NUM_TURNS_MUST_SUCCESSFULLY_MAKE)
     {
 
-      printf("Mall: Joey # %d Got out of the mall and returend to its mama!\n", joeyIndex);
-      kill(joeyProcessId, SIGINT);
+      printf("Mall: Joey # %d got out of the mall and returned to its mama!\n", jIdx);
+      kill(jPid, SIGINT);
     }
     else
     {
-
-      printf("Mall: Joey # %d must make %d more correct turns.\n", joeyIndex, NUM_TURNS_MUST_SUCCESSFULLY_MAKE - joeysNumSuccessfulTurns[joeyIndex]);
-      kill(joeyProcessId, CORRECT_TURN_SIGNAL);
+      int turnsRemaining = NUM_TURNS_MUST_SUCCESSFULLY_MAKE - joeysNumSuccessfulTurns[jIdx];
+      printf("Mall: Joey # %d must make %d more correct turns.\n", jIdx, turnsRemaining);
+      kill(jPid, CORRECT_TURN_SIGNAL);
     }
   }
 }
@@ -222,26 +222,26 @@ int main(int argc,
   //  II.A.  Initialize:
   initializeMostGlobals(argc, argv);
 
-  struct sigaction sa;
+  struct sigaction wrongTurnHandler;
 
-  memset(&sa, '\0', sizeof(struct sigaction));
-  sa.sa_flags = SA_SIGINFO | SA_RESTART;
-  sa.sa_sigaction = signal_handler;
-  sigaction(WRONG_TURN_SIGNAL, &sa, NULL);
+  memset(&wrongTurnHandler, '\0', sizeof(struct sigaction));
+  wrongTurnHandler.sa_flags = SA_SIGINFO | SA_RESTART;
+  wrongTurnHandler.sa_sigaction = signal_handler;
+  sigaction(WRONG_TURN_SIGNAL, &wrongTurnHandler, NULL);
 
-  struct sigaction saa;
+  struct sigaction correctTurnHandler;
 
-  memset(&saa, '\0', sizeof(struct sigaction));
-  saa.sa_flags = SA_SIGINFO | SA_RESTART;
-  saa.sa_sigaction = signal_handler;
-  sigaction(CORRECT_TURN_SIGNAL, &saa, NULL);
+  memset(&correctTurnHandler, '\0', sizeof(struct sigaction));
+  correctTurnHandler.sa_flags = SA_SIGINFO | SA_RESTART;
+  correctTurnHandler.sa_sigaction = signal_handler;
+  sigaction(CORRECT_TURN_SIGNAL, &correctTurnHandler, NULL);
 
-  struct sigaction act;
+  struct sigaction interruptHandler;
 
-  memset(&act, '\0', sizeof(struct sigaction));
-  act.sa_handler = sigIntHandler;
-  act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
-  sigaction(SIGINT, &act, NULL);
+  memset(&interruptHandler, '\0', sizeof(struct sigaction));
+  interruptHandler.sa_handler = sigIntHandler;
+  interruptHandler.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+  sigaction(SIGINT, &interruptHandler, NULL);
 
   // YOUR CODE HERE to install your 'LEFT_TURN_SIGNAL' and 'RIGHT_TURN_SIGNAL' handler(s)
   // YOUR CODE HERE to install your 'SIGINT' handler
