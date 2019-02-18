@@ -69,9 +69,9 @@ void correctTurnSignalHandler(int sig)
 
   //  II.
   nextTurn = ((rand() % 2) == 1) ? LEFT_TURN_SIGNAL : RIGHT_TURN_SIGNAL;
-  printf("Joey # %d: Yay!  On to the next turn; I'll guess %s.\n",
-         joeyIndex,
-         (nextTurn == LEFT_TURN_SIGNAL) ? "left" : "right");
+
+  const char *DIRECTION = (nextTurn == LEFT_TURN_SIGNAL) ? "left" : "right";
+  printf("Joey # %d: Yay!  On to the next turn; I'll guess %s.\n", joeyIndex, DIRECTION);
   fflush(stdout);
   // YOUR CODE HERE to send 'nextTurn' to 'mallPid'
 
@@ -89,9 +89,8 @@ void wrongTurnSignalHandler(int sig)
   nextTurn = (nextTurn == LEFT_TURN_SIGNAL)
                  ? RIGHT_TURN_SIGNAL
                  : LEFT_TURN_SIGNAL;
-  printf("Joey # %d: Oops!  Let us try the other direction: %s.\n",
-         joeyIndex,
-         (nextTurn == LEFT_TURN_SIGNAL) ? "left" : "right");
+  const char *DIRECTION = (nextTurn == LEFT_TURN_SIGNAL) ? "left" : "right";
+  printf("Joey # %d: Oops!  Let us try the other direction: %s.\n", joeyIndex, DIRECTION);
   fflush(stdout);
   // YOUR CODE HERE to send 'nextTurn' to 'mallPid'
 
@@ -118,20 +117,20 @@ void installTurnHandlers()
 
   //  II.  Install the handler:
   //*
-  struct sigaction act0;
-  struct sigaction act1;
+  struct sigaction correctTurn;
+  struct sigaction wrongTurn;
 
-  memset(&act0, '\0', sizeof(struct sigaction));
-  memset(&act1, '\0', sizeof(struct sigaction));
+  memset(&wrongTurn, '\0', sizeof(struct sigaction));
+  memset(&correctTurn, '\0', sizeof(struct sigaction));
 
-  act0.sa_handler = correctTurnSignalHandler;
-  act1.sa_handler = wrongTurnSignalHandler;
+  correctTurn.sa_handler = correctTurnSignalHandler;
+  wrongTurn.sa_handler = wrongTurnSignalHandler;
 
-  act0.sa_flags = SA_NOCLDSTOP | SA_RESTART;
-  act1.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+  correctTurn.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+  wrongTurn.sa_flags = SA_NOCLDSTOP | SA_RESTART;
 
-  sigaction(CORRECT_TURN_SIGNAL, &act1, NULL);
-  sigaction(WRONG_TURN_SIGNAL, &act0, NULL);
+  sigaction(CORRECT_TURN_SIGNAL, &correctTurn, NULL);
+  sigaction(WRONG_TURN_SIGNAL, &wrongTurn, NULL);
   //*
 
   //  YOUR CODE HERE
@@ -148,12 +147,12 @@ void installSigIntHandler()
   //  II.  Install handler:
   //  II.A.  Set up struct to specify the new action.
 
-  struct sigaction act;
+  struct sigaction action;
 
-  memset(&act, '\0', sizeof(struct sigaction));
-  act.sa_handler = sigIntHandler;
-  act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
-  sigaction(SIGINT, &act, NULL);
+  memset(&action, '\0', sizeof(struct sigaction));
+  action.sa_handler = sigIntHandler;
+  action.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+  sigaction(SIGINT, &action, NULL);
 
   //  YOUR CODE HERE
 
