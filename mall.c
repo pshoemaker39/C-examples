@@ -140,27 +140,21 @@ int wasJoeysTurnCorrect(int joeyIndex,
 
 void signal_handler(int sig, siginfo_t *infoPtr, void *dataPtr)
 {
-
   pid_t jPid = infoPtr->si_pid;
-
   int jIdx = getJoeyIndex(jPid);
-
-  if (wasJoeysTurnCorrect(jIdx, sig) == 0)
+  if (!wasJoeysTurnCorrect(jIdx, sig))
   {
     const char *DIRECTION = (sig == RIGHT_TURN_SIGNAL) ? "right" : "left";
     printf("Mall: Joey # %d made the wrong turn!  (%s) \n", jIdx, DIRECTION);
     kill(jPid, WRONG_TURN_SIGNAL);
   }
-  else if (wasJoeysTurnCorrect(jIdx, sig) == 1)
+  else if (wasJoeysTurnCorrect(jIdx, sig))
   {
-
     const char *DIRECTION = (sig == RIGHT_TURN_SIGNAL) ? "right" : "left";
     printf("Mall: Joey # %d turned correctly!  (%s) \n", jIdx, DIRECTION);
     joeysNumSuccessfulTurns[jIdx]++;
-
     if (joeysNumSuccessfulTurns[jIdx] >= NUM_TURNS_MUST_SUCCESSFULLY_MAKE)
     {
-
       printf("Mall: Joey # %d got out of the mall and returned to its mama!\n", jIdx);
       kill(jPid, SIGINT);
     }
