@@ -99,26 +99,19 @@ void sigChldHandler(int sig)
   int status;
   pid_t childPid;
   int joey;
-  int i = 0; //*
+  int i = 0;
 
   while ((childPid = waitpid(-1, &status, WNOHANG)) > 0)
   {
-
-    if (WIFEXITED(status))
+    if ((WIFEXITED(status)) && (WEXITSTATUS(status) == EXIT_SUCCESS))
     {
-
-      if (WEXITSTATUS(status) == EXIT_SUCCESS)
+      for (i = 0; i < numJoeys; i++)
       {
-
-        for (i = 0; i < numJoeys; i++)
+        if (joeyPidArray[i] == childPid)
         {
-
-          if (joeyPidArray[i] == childPid)
-          {
-            printf("Mama: Joey # %d complete.\n", i);
-            numActiveJoeys--;
-            break;
-          }
+          printf("Mama: Joey # %d complete.\n", i);
+          numActiveJoeys--;
+          break;
         }
       }
     }
@@ -141,12 +134,12 @@ void installSigChldHandler()
 {
   //  I.  Application validity check:
 
-  struct sigaction act;
+  struct sigaction signal;
 
-  memset(&act, '\0', sizeof(struct sigaction));
-  act.sa_handler = sigChldHandler;
-  act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
-  sigaction(SIGCHLD, &act, NULL);
+  memset(&signal, '\0', sizeof(struct sigaction));
+  signal.sa_handler = sigChldHandler;
+  signal.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+  sigaction(SIGCHLD, &signal, NULL);
 
   //  II.  Install the handler:
   //  YOUR CODE HERE
